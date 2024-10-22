@@ -1,32 +1,32 @@
-const redisUtil = require('../utils/redis');
-const dbsUtil = require('../utils/db');
+import redisClient from '../utils/redis';
+import dbClient from '../utils/db';
 
 class AppController {
-  static async getStatus(req, res) {
-    try {
-      const redStatus = redisUtil.isAlive();
-      const dbStatus = dbsUtil.isAlive();
-      res.status(200).json({
-        redis: redStatus,
-        db: dbStatus,
-      });
-    } catch (error) {
-      res.status(500).json({ error: 'Internal server error' });
-    }
+  /**
+   * should return if Redis is alive and if the DB is alive too
+   * by using the 2 utils created previously:
+   * { "redis": true, "db": true } with a status code 200
+   */
+  static getStatus(request, response) {
+    const status = {
+      redis: redisClient.isAlive(),
+      db: dbClient.isAlive(),
+    };
+    response.status(200).send(status);
   }
 
-  static async getStats(req, res) {
-    try {
-      const userCount = await dbsUtil.nbUsers();
-      const filesCount = await dbsUtil.nbFiles();
-      res.status(200).json({
-        users: userCount,
-        files: filesCount,
-      });
-    } catch (error) {
-      res.status(500).json({ error: 'Internal server error' });
-    }
+  /**
+   * should return the number of users and files in DB:
+   * { "users": 12, "files": 1231 }
+   *  with a status code 200
+   */
+  static async getStats(request, response) {
+    const stats = {
+      users: await dbClient.nbUsers(),
+      files: await dbClient.nbFiles(),
+    };
+    response.status(200).send(stats);
   }
 }
 
-module.exports = AppController;
+export default AppController;
